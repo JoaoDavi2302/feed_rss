@@ -1,31 +1,52 @@
-# Here is the function that fetches the XML from the RSS source.
-# It runs every 4 hours. This interval is arbitrary and can be changed.
-# Keep in mind that if you add many RSS sources, processing all links may lead to performance issues.
 import feedparser
 import time
 from datetime import datetime
 from feeds.brasil import RSS_FEED
+from typing import Any
 
-# this while true is ugly and will be changed.
 
-while True:
-    for feed in RSS_FEED:
-        print(f"Fetching feed: {feed}" )
-        f = feedparser.parse(feed) 
+# Here we have a function that standardizes the fields of the RSS sources.
+# This is one of the most annoying parts of building this project, because the sources are a mess.
+# Different fields and feed versions make this annoying as hell..
+def normalized_entry(entry: Any, feed_title: str, feed_url:str) -> dict | None:
+     url = entry.get("link")
+     if not url:
+          return None
+     
+    # The standard object that represents a news item.
+     return {
+          "title": entry.get("title", "No title"),
+          "url": url,
+          # published_date
+          "feed_source": feed_title or feed_url,
+          "summary": entry.get("summary") or entry.get("guid") or url,
+          "raw_entry": dict(entry)
+     }
 
-        for entry in f.entries:
-            title = entry.get("title")
-            url = entry.get("link")
-            published_parsed = entry.get("published_parsed")
+# This function fetches all RSS feeds from the given list.
+# It parses each feed, normalizes its entries,
+# and returns a list of normalized dictionaries.
+def fetch_rss(rss_list: list[str]) -> list[dict]:
+        normalized_items: list[dict] = []
+
+        for feed_url in rss_list:
+            print(f"Fetching feed: {feed_url}" )
+            parsed_feed = feedparser.parse(feed_url) 
+
+            feed_title = parsed_feed.feed.get("title", feed_url)
+
+            for entry in parsed_feed.entries:
+                normalized = normalized_entry(entry, feed_title, feed_url)
+                if normalized is None:
+                     continue
                 
-            print(title)
+                normalized_items.append(normalized)
 
-            if not url:
-                continue
-
+        return normalized_items
 
 
-    time.sleep(10)
+
+fetch_rss(RSS_FEED)
 
 
  
