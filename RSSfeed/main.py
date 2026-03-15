@@ -1,3 +1,7 @@
+# Here we have all the logic for two things: fetching the RSS data and normalizing it, since this is a mess and nothing seems to follow a standard here.
+# The core problem is normalizing all the fields in a way that makes sense without losing important data.
+# This also shows the importance of discontinuing an old version after an update.
+
 import feedparser
 import time
 from datetime import datetime
@@ -5,7 +9,6 @@ from feeds.brasil import RSS_FEED
 from typing import Any
 
 # This function solves the problem of the different ways feeds handle dates.
-# I really wish they all used a single RSS version.
 def parse_entry_date(entry: Any) -> datetime | None:
      published_parsed = entry.get("published_parsed") or entry.get("updated_parsed")
 
@@ -68,9 +71,20 @@ def fetch_rss(rss_list: list[str]) -> list[dict]:
 
         return normalized_items
 
+# This calls the fetch function and runs it every 4 hours.
+def run_scheduler(rss_list: list[str]) -> None:
 
+    # I hate this while True. This will definitely change.
+    while True:
+        items = fetch_rss(rss_list)
 
-fetch_rss(RSS_FEED)
+        for item in items:
+                print(item["title"])
+
+        time.sleep(4)
+
+if __name__ == "__main__":
+    run_scheduler(RSS_FEED)
 
 
  
