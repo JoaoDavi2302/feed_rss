@@ -71,20 +71,66 @@ def fetch_rss(rss_list: list[str]) -> list[dict]:
 
         return normalized_items
 
+# This is just to monitor whether the feeds are returning entries.
+# It might later become a function to sanitize entries
+# if some entries are not in the format they should be.
+def debug_rss_feeds(rss_list: list[str]):
+     for feed_url in rss_list:
+          parsed_feed = feedparser.parse(feed_url)
+
+          if isinstance(parsed_feed.feed, dict):
+               feed_title = parsed_feed.feed.get("title") or feed_url
+          else:
+               feed_title = feed_url
+
+          total_entries = len(parsed_feed.entries)
+
+          missing_link = 0
+          missing_date = 0
+          missing_title = 0
+          valid_entries = 0
+
+          for entry in parsed_feed.entries:
+               title = entry.get("title")
+               link = entry.get("link")
+               date = entry.get("published_parsed") or entry.get("updated_parsed")
+
+               if not link:
+                    missing_link += 1
+               if not date:
+                    missing_date += 1
+               if not title:
+                    missing_title += 1
+               if title and link and date:
+                    valid_entries += 1
+
+          discarded_entries = total_entries - valid_entries
+
+          print(
+               f"analisando o feed: {feed_url}"
+               f"O feed {feed_title} trouxe {total_entries} entries, "
+               f"{valid_entries} válidas e {discarded_entries} descartadas. "
+               f"Faltando: {missing_link} links, {missing_date} datas, {missing_title} títulos."
+          )
+
+          if total_entries == 0:
+               print(f"o feed: ${feed_url} retorna 0 entries")
+
 # This calls the fetch function and runs it every 4 hours.
-def run_scheduler(rss_list: list[str]) -> None:
+def run_scheduler(rss_list: list[str]):
 
     # I hate this while True. This will definitely change.
     while True:
         items = fetch_rss(rss_list)
 
         for item in items:
-                print(item["title"])
+                print(item["url"])
 
-        time.sleep(4)
+        time.sleep(4 * 3600)
 
 if __name__ == "__main__":
-    run_scheduler(RSS_FEED)
+#     run_scheduler(RSS_FEED)
+      debug_rss_feeds(RSS_FEED)
 
 
  
