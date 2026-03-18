@@ -25,7 +25,6 @@ def parse_entry_date(entry: Any) -> datetime | None:
             )
      return None
 
-
 def generate_id(url: str, title: str) -> str:
      combined_string = f"{url}{title}"
 
@@ -49,15 +48,17 @@ def normalized_entry(entry: Any, feed_title: str, feed_url:str) -> dict | None:
           "url": clean_url,
           "published_date": parse_entry_date(entry),
           "feed_source": feed_title or feed_url,
-          "summary": entry.get("summary") or entry.get("guid"),
+          "summary": entry.get("summary"),
           "raw_entry": dict(entry)
      }
 
-# This is a function to canonize all the url provides from the entries
+# This function canonicalizes all URLs provided by the entries.
 def canonize_url(url:str) -> str | None:
      if not url:
          return None
      
+     # Some feeds, like Folha, handle their URLs using a redirect link and the real link, separated by a "*".
+     # Here we just extract the real URL if that happens.
      if "*" in url:
           url = url.split("*")[-1]
      
