@@ -25,25 +25,18 @@ def parse_entry_date(entry: Any) -> datetime | None:
             )
      return None
 
-def generate_id(url: str, title: str) -> str:
-     combined_string = f"{url}{title}"
-
-     return hashlib.md5(combined_string.encode("utf-8")).hexdigest()
-
 
 # Here we have a function that standardizes the fields of the RSS sources.
 # This is one of the most annoying parts of building this project, because the sources are a mess.
 # Different fields and feed versions make this annoying as hell..
-def normalized_entry(entry: Any, feed_title: str, feed_url:str) -> dict | None:
+def normalized_entry(entry: Any, feed_title: str, feed_url:str) -> dict :
      raw_url = entry.get("link")
      clean_url = canonize_url(raw_url) if raw_url else ""
-     title = entry.get("title", "No title")
-
-     entry_id = entry.get("guid") or generate_id(clean_url, title)
 
     # The standard object that represents a news item.
      return {
-          "id": entry_id,
+          "id": hashlib.md5(clean_url.encode("utf-8")).hexdigest(),
+          "external_id": entry.get("guid"),
           "title": entry.get("title", "No title"),
           "url": clean_url,
           "published_date": parse_entry_date(entry),
@@ -53,9 +46,9 @@ def normalized_entry(entry: Any, feed_title: str, feed_url:str) -> dict | None:
      }
 
 # This function canonicalizes all URLs provided by the entries.
-def canonize_url(url:str) -> str | None:
+def canonize_url(url:str) -> str :
      if not url:
-         return None
+         return ""
      
      # Some feeds, like Folha, handle their URLs using a redirect link and the real link, separated by a "*".
      # Here we just extract the real URL if that happens.
@@ -95,6 +88,9 @@ def fetch_rss(rss_list: list[str]) -> list[dict]:
         for feed_url in rss_list:
             print(f"Fetching feed: {feed_url}" )
             parsed_feed = feedparser.parse(feed_url) 
+
+            if parsed_feed.bozo:
+                 print(f"this feed {feed_url} have this problem {parsed_feed.bozo_exception}")
             
             
             feed_meta = parsed_feed.feed
