@@ -1,4 +1,8 @@
-from typing import Any, Optional, Dict
+# This normalizes the entries.
+# Everything that comes from the feed is a mess, and nothing follows a standard.
+# So, we have to standardize it into an object to persist in the database.
+
+from typing import Any
 from .utils import canonize_url, parse_entry_date
 
 def normalize_entry(entry: Any, feed_title: str, feed_url: str) -> dict | None:
@@ -13,3 +17,14 @@ def normalize_entry(entry: Any, feed_title: str, feed_url: str) -> dict | None:
         return None
     
     status = "valid" if published_at else "partial"
+
+    return {
+        "external_id": external_id,
+        "title": title,
+        "url": clean_url,
+        "published_at": published_at,
+        "feed_url": feed_url,
+        "status": status,
+        "summary": entry.get("summary") or "",
+        "raw_conent": dict(entry)
+    }
