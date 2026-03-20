@@ -24,7 +24,7 @@ class RSS_entry(models.Model):
     raw_content = models.JSONField()
 
     status = models.CharField(max_length=20, default="valid")
-    published_at = models.DateField(null=True, blank=True)
+    published_at = models.DateTimeField(null=True, blank=True)
     fetched_at = models.DateTimeField()
 
     created_at = models.DateTimeField(auto_now_add=True)

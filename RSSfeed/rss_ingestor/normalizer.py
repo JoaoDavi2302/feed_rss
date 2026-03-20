@@ -26,7 +26,7 @@ def normalize_entry(entry: Any, feed_title: str, feed_url: str) -> dict | None:
         "feed_url": feed_url,
         "status": status,
         "summary": entry.get("summary") or "",
-        "raw_conent": dict(entry)
+        "raw_content": dict(entry)
     }
 
 def normalize_feed(raw_feed_data: Any, feed_url: str) -> dict:
