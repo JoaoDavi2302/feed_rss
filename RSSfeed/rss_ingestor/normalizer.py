@@ -28,3 +28,14 @@ def normalize_entry(entry: Any, feed_title: str, feed_url: str) -> dict | None:
         "summary": entry.get("summary") or "",
         "raw_conent": dict(entry)
     }
+
+def normalize_feed(raw_feed_data: Any, feed_url: str) -> dict:
+    feed_meta = getattr(raw_feed_data, "feed", {})
+
+    feed_title = feed_meta.get("title", feed_url).strip()
+
+    return {
+        "name":feed_title,
+        "feed_url": feed_url,
+        "description": feed_meta.get("description", ""),
+    } 
