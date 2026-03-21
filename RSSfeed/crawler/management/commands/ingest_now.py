@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from feeds.brasil import RSS_FEED
-from crawler.migrations.services import persist_ingestion_feeds
+from crawler.services import persist_ingestion_feeds
 
 class Command(BaseCommand):
     help = "run ingestion and persist data in PostgreSQL"

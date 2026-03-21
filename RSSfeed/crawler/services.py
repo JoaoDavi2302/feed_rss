@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.utils import timezone
-from ...models import RSS_entry, RSS_source
-from ...rss_ingestor.pipeline import run_ingestion_pipeline
+from crawler.models import RSS_entry, RSS_source
+from rss_ingestor.pipeline import run_ingestion_pipeline
 
 def persist_ingestion_feeds(url):
     ingestion_results = run_ingestion_pipeline(url)
@@ -28,7 +28,7 @@ def persist_ingestion_feeds(url):
                         'title': entry['title'],
                         'url': entry['url'],
                         'summary': entry['summary'],
-                        'content_raw': entry['raw_content'],
+                        'raw_content': entry['raw_content'],
                         'status': entry.get('status', 'valid'),
                         'published_at': entry['published_at'],
                         'fetched_at': entry['fetched_at'],
